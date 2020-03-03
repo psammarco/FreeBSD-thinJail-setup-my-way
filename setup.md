@@ -1,6 +1,6 @@
 **FreeBSD thinJail setup, my way**
 
-The main advantages of using a thinjail over a thickjail is to be able to share a rootfs image with as many jail configurations as you'd like, which on average saves about 2G+ per jail, and ensure the same code level across all of your thinjails, since running freebsd-update against the thinjail's base will essentially update all of them.
+The main advantages of using a thinjail over a thickjail is to share a rootfs image with as many jail configurations as you'd like, which on average saves about 2G+ per jail, and ensure the same code level across all of your thinjails, since running freebsd-update against the thinjail's base will essentially update all of them.
 
 The idea behind this configuration is to separate the thinjail's base structure and system configuration into different paths but within the /jails ZFS dataset, primarily to make it easier to export individual parts of the structure through NFS(should you need it).
 This setup will deploy the system image template into /jails/structure/thinjail, jail specific RW skeleton folder to /jails/thinjails, fstab into /jails/fstab, and ultimately base + skeleton folders will be mounted into /jails/mnt.
