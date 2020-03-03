@@ -1,13 +1,22 @@
-**FreeBSD thinJail setup my way**
+**FreeBSD thinJail setup, my way**
 
-The idea behind this setup is to separate the thinjail's base structure and system configuration into different paths but within /jails ZFS dataset, mainly to make it easier to export individual parts of the structure through NFS.
-With this setup the system image template goes into /jails/structure/thinjail, jail specific RW skeleton folder to /jails/thinjails,  fstab in /jails/fstab, and ultimately base + skeleton folders are mounted in /jails/mnt.
+The main advantages of using a thinjail over a thickjail is to be able to share a rootfs image with as many jail configurations as you'd like, which on average saves about 2G+ per jail, and ensure the same code level across all of your thinjails, since running freebsd-update against the thinjail's base will essentially update all of them.
 
-#### Create thinjail base template ####
+The idea behind this configuration is to separate the thinjail's base structure and system configuration into different paths but within the /jails ZFS dataset, primarily to make it easier to export individual parts of the structure through NFS(should you need it).
+This setup will deploy the system image template into /jails/structure/thinjail, jail specific RW skeleton folder to /jails/thinjails, fstab into /jails/fstab, and ultimately base + skeleton folders will be mounted into /jails/mnt.
+
+#### Creating the /jails dataset and mountpoint ####
+```
+sudo zfs create zroot/jails
+sudo zfs set mountpoint=/jails zroot/jails
+```
+Next, you would need to obtain the freebsd rootfs image. Please refer to the freebsd [handbook](https://www.freebsd.org/doc/handbook/jails-build.html) as it describes how to do so from a freebsd iso.
+
+#### Create the thinjail base template ####
 ```
 sudo mkdir -p /jails/structure/thinjail/base/12.1-RELEASE
 ```
-#### Copy image into thinjail's base folder ####
+#### Copy the rootfs image into thinjail's base folder ####
 ```
 sudo cp -R /jails/releases/12.1-RELEASE/root/* /jails/structure/thinjail/base/12.1-RELEASE/
 ```
@@ -20,7 +29,7 @@ sudo mv /jails/structure/thinjail/base/12.1-RELEASE/var /jails/structure/thinjai
 sudo mv /jails/structure/thinjail/base/12.1-RELEASE/tmp /jails/structure/thinjail/skeleton/12.1-RELEASE/tmp
 sudo mv /jails/structure/thinjail/base/12.1-RELEASE/root /jails/structure/thinjail/skeleton/12.1-RELEASE/root
 ```
-#### Template skeleton structure symlinking ####
+#### Skeleton base structure symlinking ####
 ```
 cd /jails/structure/thinjail/base/12.1-RELEASE
 sudo mkdir skeleton
@@ -31,13 +40,16 @@ sudo ln -s skeleton/usr/local usr/local
 sudo ln -s skeleton/tmp tmp
 sudo ln -s skeleton/var var
 ```
-#### Creating and copying skeleton template to thinjail1 local folder ####
+#### Creating and copying the skeleton base to the thinjail1 local folder ####
 ```
 sudo mkdir -p /jails/thinjails/thinjail1
 sudo cp -R /jails/structure/thinjail/skeleton/12.1-RELEASE/* /jails/thinjails/thinjail1
+```
+#### Add thinjail1 hostname to rc.conf ####
+```
 echo hostname=\"thinjail1\" > rc.conf; sudo mv rc.conf /jails/thinjails/thinjail1/etc/
 ```
-#### Create folder where base and skeleton will be mounted to ####
+#### Create a folder where both rootfs and skeleton base will be mounted to ####
 ```
 sudo mkdir -p /jails/mnt/thinjail1
 ```
@@ -65,7 +77,7 @@ thinjail1 {
     exec.consolelog = "/jails/logs/thinjail1/console.log";
  }
  ```
-If all went well, a mount from the FreeBSD host with thinjail1 running should look as following 
+Now, if all went well and our thinjail1 is up and running, a mount from the FreeBSD host will show a similar output to this: 
 ```
 [admin@lockdown ~]$ mount |grep thinjail1
 /jails/structure/thinjail/base/12.1-RELEASE on /jails/mnt/thinjail1 (nullfs, local, read-only)
@@ -73,10 +85,10 @@ If all went well, a mount from the FreeBSD host with thinjail1 running should lo
 devfs on /jails/mnt/thinjail1/dev (devfs, local, multilabel)
 [admin@lockdown ~]$ 
 ```
-While from thinjail1 only / appears as mounted and in RO, though skeleton is writable
+While from thinjail1 only / appears to be mounted and in RO, though skeleton is writable
 ```
 [admin@lockdown ~]$ sudo jexec thinjail1 mount
 /jails/structure/thinjail/base/12.1-RELEASE on / (nullfs, local, read-only)
 [admin@lockdown ~]$ 
 ```
-Thanks to [citia](https://github.com/clinta/clinta.github.io/blob/2b28a7d626eff467e44ce18dd1000aa2c279a329/_posts/2015-08-09-freebsd-jails-the-hard-way.md) for the idea. 
+Thanks to [citia](https://github.com/clinta/clinta.github.io/blob/2b28a7d626eff467e44ce18dd1000aa2c279a329/_posts/2015-08-09-freebsd-jails-the-hard-way.md) for his idea of deploying a thinjail base.
