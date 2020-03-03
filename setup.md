@@ -91,4 +91,4 @@ While from thinjail1 only / appears to be mounted and in RO, though skeleton is 
 /jails/structure/thinjail/base/12.1-RELEASE on / (nullfs, local, read-only)
 [admin@lockdown ~]$ 
 ```
-Thanks to [citia](https://github.com/clinta/clinta.github.io/blob/2b28a7d626eff467e44ce18dd1000aa2c279a329/_posts/2015-08-09-freebsd-jails-the-hard-way.md) for his idea of deploying a thinjail base.
+Thanks to [citia](https://github.com/clinta/clinta.github.io/blob/2b28a7d626eff467e44ce18dd1000aa2c279a329/_posts/2015-08-09-freebsd-jails-the-hard-way.md) for his initial idea of deploying a thinjail base.
