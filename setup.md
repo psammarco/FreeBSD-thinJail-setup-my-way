@@ -42,16 +42,16 @@ sudo ln -s skeleton/var var
 ```
 #### Creating and copying the skeleton base to the thinjail1 local folder ####
 ```
-sudo mkdir -p /jails/thinjails/thinjail1
-sudo cp -R /jails/structure/thinjail/skeleton/12.1-RELEASE/* /jails/thinjails/thinjail1
+sudo mkdir -p /jails/structure/rootfs/thinjail1
+sudo cp -R /jails/structure/thinjail/skeleton/12.1-RELEASE/* /jails/structure/rootfs/thinjail1
 ```
 #### Add thinjail1 hostname to rc.conf ####
 ```
-echo hostname=\"thinjail1\" > rc.conf; sudo mv rc.conf /jails/thinjails/thinjail1/etc/
+echo hostname=\"thinjail1\" > rc.conf; sudo mv rc.conf /jails/structure/rootfs/thinjail1/etc/
 ```
 #### Create a folder where both rootfs and skeleton base will be mounted to ####
 ```
-sudo mkdir -p /jails/mnt/thinjail1
+sudo mkdir -p /jails/thinjails/thinjail1
 ```
 #### Create jail's fstab folder ####
 ```
@@ -61,28 +61,28 @@ sudo mkdir /jails/fstab
 > /jails/fstab/thinjail1.fstab
 ```
 # this is thinJail's base template path       # thinjail local mount
-/jails/structure/thinjail/base/12.1-RELEASE /jails/mnt/thinjail1/  nullfs  ro  0 0
+/jails/structure/thinjail/base/12.1-RELEASE /jails/thinjails/thinjail1/  nullfs  ro  0 0
 # Skeleton folder structure                   # same as above
-/jails/thinjails/thinjail1 /jails/mnt/thinjail1/skeleton  nullfs  rw  0 0
+/jails/structure/rootfs/thinjail1 /jails/thinjails/thinjail1/skeleton  nullfs  rw  0 0
 ```
 
 #### jail.conf ####
 ```
 thinjail1 {
-    path          = "/jails/mnt/thinjail1";
+    path          = "/jails/thinjails/thinjail1";
     host.hostname = "thinjail1";
     $epair        = "epair3";  # must be unique in every jail
     mount.fstab    = "/jails/fstab/thinjail1.fstab";
     exec.poststart = "ifconfig epair3a 192.168.99.1 netmask 255.255.255.0";
-    exec.consolelog = "/jails/logs/thinjail1/console.log";
+    exec.consolelog = "/jails/logs/thinjail1.console.log";
  }
  ```
 Now, if all went well and our thinjail1 is up and running, a mount from the FreeBSD host will show a similar output to this: 
 ```
 [admin@lockdown ~]$ mount |grep thinjail1
-/jails/structure/thinjail/base/12.1-RELEASE on /jails/mnt/thinjail1 (nullfs, local, read-only)
-/jails/thinjails/thinjail1 on /jails/mnt/thinjail1/skeleton (nullfs, local)
-devfs on /jails/mnt/thinjail1/dev (devfs, local, multilabel)
+/jails/structure/thinjail/base/12.1-RELEASE on /jails/thinjails/thinjail1 (nullfs, local, read-only)
+/jails/structure/rootfs/thinjail1 on /jails/thinjails/thinjail1/skeleton (nullfs, local)
+devfs on /jails/thinjails/thinjail1/dev (devfs, local, multilabel)
 [admin@lockdown ~]$ 
 ```
 While from thinjail1 only / appears to be mounted and in RO, though skeleton is writable
