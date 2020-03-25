@@ -36,7 +36,7 @@ sudo mkdir skeleton
 sudo ln -s skeleton/etc etc
 sudo ln -s skeleton/home home
 sudo ln -s skeleton/root root
-ln -s ../skeleton/usr/local usr/local
+sudo ln -s ../skeleton/usr/local usr/local
 sudo ln -s skeleton/tmp tmp
 sudo ln -s skeleton/var var
 ```
